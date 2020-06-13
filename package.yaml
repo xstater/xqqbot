@@ -32,6 +32,8 @@ dependencies:
 - xml-conduit
 - html-conduit
 - process
+- modern-uri
+- unordered-containers
 
 library:
   source-dirs: src
