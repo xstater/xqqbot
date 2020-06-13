@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: dba3a74a5aec189a6af2edbeade44d2a0f66dcbdb2005befd70d373dc018e135
+-- hash: b3593b4d524a2876ac900d1488cb06e2e07e16e10b7ed7b5cefdfd6f57fb564b
 
 name:           xqqbot
 version:        0.1.0.0
@@ -26,8 +26,6 @@ source-repository head
   location: https://github.com/githubuser/xqqbot
 
 library
-  exposed-modules:
-      Lib
   other-modules:
       Paths_xqqbot
   hs-source-dirs:
