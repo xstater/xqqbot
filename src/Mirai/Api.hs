@@ -1,11 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE DeriveGeneric #-}
 
-module Mirai.Http(
+module Mirai.Api(
     -- version
-    -- auth,
-    -- verify,
-    -- release,
     -- sendFriendMessage,
     -- sendTempMessage,
     -- sendGroupMessage,
@@ -35,8 +32,17 @@ module Mirai.Http(
 import Control.Monad
 import Control.Monad.IO.Class
 import Control.Exception
+import Control.Monad.Reader
+import Control.Monad.Except
 import Data.Text
 import Data.Aeson
+import Data.Aeson.Constructor
 import Network.HTTP.Req
 
-baseURL = http "127.0.0.1:23311"
+type Session m a = ExceptT Text (ReaderT Text m) a
+
+-- instance MonadHttp (Session m) where
+--     handleHttpException err = 
+
+-- runSession :: MonadIO m => Text -> Session m a -> m (Either Text a)
+-- runSession = undefined
