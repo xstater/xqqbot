@@ -11,11 +11,11 @@ import Network.HTTP.Req
 import Data.ByteString
 import Mirai.MessageChain
 
--- main :: IO ()
--- main = scotty 23312 $ do
---     post "/" $ do
---         bodyData <- body
---         liftAndCatchIO $ print bodyData
+main :: IO ()
+main = scotty 23312 $ do
+    post "/" $ do
+        bodyData <- body
+        liftAndCatchIO $ print bodyData
 
 -- main :: IO ()
 -- main = do
@@ -46,8 +46,8 @@ import Mirai.MessageChain
 --     --     return (responseBody response :: ByteString)
 --     -- Data.ByteString.writeFile "test.jpg" jpg
 
-main :: IO ()
-main = do
-    print $ toJsonTextChain [Plain "asd",At 123]
-    let jsn = decode "{\"type\":\"Quote\",\"id\":14213,\"targetId\":1123,\"origin\":[{\"type\":\"Plain\",\"text\":\"asdasd\"}]}" :: Maybe Value
-    print $ fromJsonValue jsn
+-- main :: IO ()
+-- main = do
+--     print $ toJsonTextChain [Plain "asd",At 123]
+--     let jsn = decode "{\"type\":\"Quote\",\"id\":14213,\"targetId\":1123,\"origin\":[{\"type\":\"Plain\",\"text\":\"asdasd\"}]}" :: Maybe Value
+--     print $ fromJsonValue jsn
