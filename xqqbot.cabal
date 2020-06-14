@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 7aea8ef0682d36b311a940cee12320b6d3a45883b58d4c9efe05ac314ad0ed23
+-- hash: 1d1f485f0205d9cfd4ddc7710553ff5d96a8bc97ebbeddda56e53197da52e1e6
 
 name:           xqqbot
 version:        0.1.0.0
@@ -28,8 +28,10 @@ source-repository head
 library
   exposed-modules:
       Data.Aeson.Constructor
+      Data.Aeson.Convert
       Data.Aeson.Cursor
       Mirai.Api
+      Mirai.MessageChain
   other-modules:
       Paths_xqqbot
   hs-source-dirs:
@@ -37,6 +39,7 @@ library
   build-depends:
       aeson
     , base >=4.7 && <5
+    , bytestring
     , hint
     , html-conduit
     , modern-uri
@@ -61,6 +64,7 @@ executable xqqbot
   build-depends:
       aeson
     , base >=4.7 && <5
+    , bytestring
     , hint
     , html-conduit
     , modern-uri
@@ -87,6 +91,7 @@ test-suite xqqbot-test
   build-depends:
       aeson
     , base >=4.7 && <5
+    , bytestring
     , hint
     , html-conduit
     , modern-uri
