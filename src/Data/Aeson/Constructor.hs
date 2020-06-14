@@ -13,34 +13,32 @@ module Data.Aeson.Constructor(
 import Data.Text
 import Data.String
 
-type Json = Text
-
-surround :: Char -> Char -> Json -> Json
+surround :: Char -> Char -> Text -> Text
 surround cl cr txt = cl `cons` (txt `snoc` cr)
 
-number :: (Num n,Show n) => n -> Json
+number :: (Num n,Show n) => n -> Text
 number = pack . show
 
-boolean :: Bool -> Json
+boolean :: Bool -> Text
 boolean True = "true"
 boolean False = "false"
 
-string :: Json -> Json
+string :: Text -> Text
 string n = surround '\"' '\"' n 
 
-object :: Json -> Json
+object :: Text -> Text
 object content = surround '{' '}' content
 
-array :: [Json] -> Json
+array :: [Text] -> Text
 array xs = surround '[' ']' $ splt xs
     where
-        splt :: [Json] -> Json
+        splt :: [Text] -> Text
         splt [] = ""
         splt (x:[]) = x
         splt (x:xs) = x `append` (',' `cons` (splt xs))
 
-(</>) :: Json -> Json -> Json
+(</>) :: Text -> Text -> Text
 l </> r = l `append` (',' `cons` r)
 
-(//:) :: Json -> Json -> Json
+(//:) :: Text -> Text -> Text
 ltxt //: rtxt = ('\"' `cons` (ltxt `snoc` '\"')) `append` (':' `cons` rtxt)
