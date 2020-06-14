@@ -20,12 +20,18 @@ module Mirai.MessageChain(
         content),
     MessageChain,
     toJsonText,
-    toJsonTextChain
+    toJsonTextChain,
+    fromJsonValue,
+    fromJsonValueChain
 )where
 
 import Data.Text
-import Data.Aeson hiding (object)
+import Data.Aeson hiding (object,json)
 import Data.Aeson.Constructor
+import Data.Aeson.Cursor
+import Data.Aeson.Convert
+import Data.Maybe
+import Data.Vector (toList)
 
 data Message = Source {
     messageID :: Int,
@@ -109,7 +115,60 @@ toJsonText (Json j) = object (
     ("josn" //: string j))
 toJsonText (App c) = object ( 
     ("type" //: string "App") </>
-    ("Content" //: string c))
+    ("content" //: string c))
 toJsonText (Poke n) = object ( 
     ("type" //: string "Poke") </>
     ("name" //: string n))
+
+fromJsonValueChain :: Maybe Value -> MessageChain
+fromJsonValueChain jsn = case jsn of
+    (Just (Array arr)) -> toList $ (fromJsonValue . Just) `fmap` arr
+    _ -> []
+
+fromJsonValue :: Maybe Value -> Message
+fromJsonValue jsn = case jsn /@ "type" >>= convert :: Maybe Text of
+    (Just "Source") -> Source {
+        messageID = 0 `fromMaybe` (jsn /@ "id" >>= convert),
+        time = 0 `fromMaybe` (jsn /@ "time" >>= convert)
+    }
+    (Just "Quote") -> Quote {
+        messageID = 0 `fromMaybe` (jsn /@ "id" >>= convert),
+        groupID = 0 `fromMaybe` (jsn /@ "groupId" >>= convert),
+        senderID = 0 `fromMaybe` (jsn /@ "senderId" >>= convert),
+        targetID = 0 `fromMaybe` (jsn /@ "targetId" >>= convert),
+        origin = fromJsonValueChain (jsn /@ "origin")
+    }
+    (Just "At") -> At {
+        targetID = 0 `fromMaybe` (jsn /@ "target" >>= convert)
+    }
+    (Just "AtAll") -> AtAll
+    (Just "Face") -> Face {
+        faceID = 0 `fromMaybe` (jsn /@ "faceId" >>= convert),
+        name = "" `fromMaybe` (jsn /@ "name" >>= convert)
+    }
+    (Just "Plain") -> Plain {
+        text = "" `fromMaybe` (jsn /@ "text" >>= convert)
+    }
+    (Just "Image") -> Image {
+        imageID = "" `fromMaybe` (jsn /@ "imageId" >>= convert),
+        url = "" `fromMaybe` (jsn /@ "url" >>= convert),
+        path = "" `fromMaybe` (jsn /@ "path" >>= convert)
+    }
+    (Just "FlashImage") -> FlashImage {
+        imageID = "" `fromMaybe` (jsn /@ "imageId" >>= convert),
+        url = "" `fromMaybe` (jsn /@ "url" >>= convert),
+        path = "" `fromMaybe` (jsn /@ "path" >>= convert)
+    }
+    (Just "Xml") -> Xml {
+        xml = "" `fromMaybe` (jsn /@ "xml" >>= convert)
+    }
+    (Just "Json") -> Json {
+        json = "" `fromMaybe` (jsn /@ "json" >>= convert)
+    }
+    (Just "App") -> App {
+        content = "" `fromMaybe` (jsn /@ "content" >>= convert)
+    }
+    (Just "Poke") -> Poke {
+        name = "" `fromMaybe` (jsn /@ "name" >>= convert)
+    }
+    _ -> Plain ""
