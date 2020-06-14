@@ -35,6 +35,7 @@ dependencies:
 - modern-uri
 - unordered-containers
 - bytestring
+- vector
 
 library:
   source-dirs: src
