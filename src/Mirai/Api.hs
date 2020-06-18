@@ -5,144 +5,70 @@
 {-# LANGUAGE RankNTypes #-}
 
 module Mirai.Api(
-    ErrorCode,
     Session,
-    runSession,
-    --version
-    sendFriendMessage,
-    -- sendTempMessage,
-    sendGroupMessage,
-    sendImageMessage,
-    -- uploadImage,
-    -- recall,
-    -- fetchMessage,
-    -- fetchLatestMessage,
-    -- peekMessage,
-    -- peekLatestMessage,
-    -- messageFromId,
-    -- countMessage,
-    -- friendList,
-    -- groupList,
-    -- memberList,
-    -- muteAll,
-    -- unmuteAll,
-    -- mute,
-    -- unmute,
-    -- kick,
-    -- quit,
-    -- groupConfig,
-    -- memberInfo,
-    -- config
+    runSession
 )where
 
 import Control.Monad
 import Control.Monad.IO.Class
 import Control.Exception
-import Control.Monad.Reader
+import Control.Monad.State.Lazy
 import Control.Monad.Except
 import Data.Text
 import Data.Text.Encoding
-import Data.Aeson hiding (object)
-import Data.Aeson.Constructor
-import Data.Aeson.Cursor
-import Data.Aeson.Convert
+import Data.Aeson
 import Data.ByteString
 import Network.HTTP.Req
 import Text.URI
-import Mirai.MessageChain
+import Mirai.Types.MessageChain
+import Mirai.Config
+import Mirai.Types.StatusCode
 
-baseURL = http "127.0.0.1"
-basePort = 23311
-
-reqPost path body = do
-    response <- req POST (baseURL /: path) (ReqBodyBs $ encodeUtf8 body) jsonResponse (port basePort)
-    return (responseBody response :: Maybe Value)
-
-auth :: Text -> IO (Maybe Text)
-auth key = do
-    jsn <- runReq defaultHttpConfig $ reqPost "auth" (object $ "authKey" //: (string key))
-    return $ jsn /@ "session" >>= convert
-
-data ErrorCode = 
-    AuthKeyWrong |
-    BotNonExistence |
-    SessionInvalid |
-    SessionUnverified |
-    TargetNonExistence |
-    FileNonExistence |
-    PermissionDenied |
-    BotBeBanned |
-    MessageTooLong |
-    OtherError String deriving (Eq,Ord,Show)
-
-type Session = ReaderT (Text,Int) (ExceptT ErrorCode IO)
+type Session = StateT (Text,Int) (ExceptT String IO)
 
 instance MonadHttp Session where
-    handleHttpException err = throwError $ OtherError $ show err
+    handleHttpException = throwError . show
 
-runSession :: Text -> Int -> Session () -> IO (Either ErrorCode ())
-runSession key qq session = do
-    let session_ = verify >> session >> release
-    sessionIDMaybe <- auth key
-    case sessionIDMaybe of
-        (Just sessionID) -> do
-            let except = runReaderT session_ (sessionID,qq)
-            runExceptT except
-        Nothing -> return $ Left $ OtherError "Make session failed"
+runSession :: Text -> Int -> Session () -> IO (Either String ())
+runSession authKey qq session = do
+    let session' = auth authKey >>= \s -> put (s,qq) >> verify >> session >> release
+    let except = evalStateT session' ("",0) 
+    runExceptT except
 
-analysisCode :: Maybe Value -> Session ()
-analysisCode jsn = case (jsn /@ "code") >>= convert :: Maybe Int of
-    (Just 0) -> return ()
-    (Just 1) -> throwError AuthKeyWrong
-    (Just 2) -> throwError BotNonExistence
-    (Just 3) -> throwError SessionInvalid
-    (Just 4) -> throwError SessionUnverified
-    (Just 5) -> throwError TargetNonExistence
-    (Just 6) -> throwError FileNonExistence
-    (Just 10) -> throwError PermissionDenied
-    (Just 20) -> throwError BotBeBanned
-    (Just 30) -> throwError MessageTooLong
-    _ -> throwError $ OtherError "Unknow error code"
+
+data AuthResponse = AuthResponse StatusCode Text deriving (Eq,Show)
+
+instance FromJSON AuthResponse where
+    parseJSON = withObject "AuthResponse" $ \o -> AuthResponse `fmap` (o .: "code") <*> (o .: "session")
+
+auth :: Text -> Session Text
+auth key = do
+    jsn <- req POST (apiBaseURL /: "auth") (ReqBodyJson $ object ["authKey" .= key]) jsonResponse (port apiBasePort)
+    let (AuthResponse c s) = responseBody jsn
+    case c of
+        Ok -> return s
+        _ -> throwError $ show c
+
+data VerifyResponse = VerifyResponse StatusCode Text deriving (Eq,Show)
+instance FromJSON VerifyResponse where
+    parseJSON = withObject "VerifyResponse" $ \o -> VerifyResponse `fmap` (o .: "code") <*> (o .: "msg")
 
 verify :: Session ()
 verify = do
-    (sid,qq) <- ask
-    jsn <- reqPost "verify" (object (
-        ("sessionKey" //: sid) </>
-        ("qq" //: number qq)))
-    analysisCode jsn
+    (sid,qq) <- get
+    jsn <- req POST (apiBaseURL /: "verify") (ReqBodyJson $ object ["sessionKey" .= sid,"qq" .= qq]) jsonResponse (port apiBasePort)
+    let (VerifyResponse c m) = responseBody jsn
+    case c of
+        Ok -> return ()
+        _ -> throwError $ Data.Text.unpack m
+
+type ReleaseResponse = VerifyResponse
 
 release :: Session ()
 release = do
-    (sid,qq) <- ask
-    jsn <- reqPost "release" (object (
-        ("sessionKey" //: sid) </>
-        ("qq" //: number qq)))
-    analysisCode jsn
-
-sendFriendMessage :: Int -> MessageChain -> Session ()
-sendFriendMessage qq msgc = do
-    (sid,_) <- ask
-    jsn <- reqPost "sendFriendMessage" (object (
-        ("sessionKey" //: sid) </>
-        ("target" //: number qq) </>
-        ("messageChain" //: toJsonTextChain msgc)))
-    analysisCode jsn
-
-sendGroupMessage :: Int -> MessageChain -> Session ()
-sendGroupMessage qq msgc = do
-    (sid,_) <- ask
-    jsn <- reqPost "sendGroupMessage" (object (
-        ("sessionKey" //: sid) </>
-        ("target" //: number qq) </>
-        ("messageChain" //: toJsonTextChain msgc)))
-    analysisCode jsn
-
-sendImageMessage :: Int -> Text -> Session ()
-sendImageMessage qq url = do
-    (sid,_) <- ask
-    jsn <- reqPost "sendImageMessage" (object (
-        ("sessionKey" //: sid) </>
-        ("target" //: number qq) </>
-        ("urls" //: array [string url])))
-    return ()
+    (sid,qq) <- get
+    jsn <- req POST (apiBaseURL /: "release") (ReqBodyJson $ object ["sessionKey" .= sid,"qq" .= qq]) jsonResponse (port apiBasePort)
+    let (VerifyResponse c m) = responseBody jsn
+    case c of
+        Ok -> return ()
+        _ -> throwError $ Data.Text.unpack m

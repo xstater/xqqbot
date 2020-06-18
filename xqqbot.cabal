@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: a1b92e2962568b367c9ee0d309bfa81c3091c4fc5f76b2044819ecad8e50a9ae
+-- hash: 71e814e3ec8d921f97ec1d59957f125b097e7a517a0565d19fc1b41231ef2dbe
 
 name:           xqqbot
 version:        0.1.0.0
@@ -27,11 +27,20 @@ source-repository head
 
 library
   exposed-modules:
-      Data.Aeson.Constructor
-      Data.Aeson.Convert
-      Data.Aeson.Cursor
+      Control.SignalSlot
       Mirai.Api
-      Mirai.MessageChain
+      Mirai.Api.About
+      Mirai.Api.SendImage
+      Mirai.Api.SendMessage
+      Mirai.Config
+      Mirai.Events
+      Mirai.Types.Events
+      Mirai.Types.FriendMessage
+      Mirai.Types.Group
+      Mirai.Types.GroupMessage
+      Mirai.Types.MessageChain
+      Mirai.Types.Permission
+      Mirai.Types.StatusCode
   other-modules:
       Paths_xqqbot
   hs-source-dirs:
