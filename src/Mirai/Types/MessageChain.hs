@@ -19,7 +19,12 @@ module Mirai.Types.MessageChain(
         xml,
         json,
         content),
-    MessageChain
+    MessageChain,
+    plain,
+    at,
+    atAll,
+    source,
+    image
 )where
 
 import Data.Text
@@ -144,12 +149,12 @@ instance FromJSON Message where
             "Image" -> do
                 imgid <- o .: "imageId"
                 u <- o .: "url"
-                pth <- o .: "path"
+                pth <- o .:? "path" .!= ""
                 return $ Image imgid u pth
             "FlashImage" -> do
                 imgid <- o .: "imageId"
                 u <- o .: "url"
-                pth <- o .: "path"
+                pth <- o .:? "path" .!= ""
                 return $ FlashImage imgid u pth
             "Xml" -> do
                 x <- o .: "xml"
@@ -163,4 +168,29 @@ instance FromJSON Message where
             "Poke" -> do
                 n <- o .: "name"
                 return $ Poke n
-        
+
+plain :: MessageChain -> Maybe Text
+plain [] = Nothing
+plain ((Plain txt):_) = Just txt
+plain (_:xs) = plain xs
+
+at :: MessageChain -> Maybe (Int,Text)
+at [] = Nothing
+at ((At qq nam):_) = Just (qq,nam)
+at (_:xs) = at xs
+
+atAll :: MessageChain -> Maybe ()
+atAll [] = Nothing
+atAll (AtAll:_) = Just ()
+atAll (_:xs) = atAll xs
+
+source :: MessageChain -> Maybe (Int,Int)
+source [] = Nothing
+source ((Source msgid tim):_) = Just (msgid,tim)
+source (_:xs) = source xs
+
+image :: MessageChain -> Maybe (Text,Text,Text)
+image [] = Nothing
+image ((Image imgid u pth):_) = Just (imgid,u,pth)
+image ((FlashImage imgid u pth):_) = Just (imgid,u,pth)
+image (_:xs) = image xs

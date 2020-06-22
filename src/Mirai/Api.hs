@@ -29,9 +29,9 @@ type Session = StateT (Text,Int) (ExceptT String IO)
 instance MonadHttp Session where
     handleHttpException = throwError . show
 
-runSession :: Text -> Int -> Session () -> IO (Either String ())
-runSession authKey qq session = do
-    let session' = auth authKey >>= \s -> put (s,qq) >> verify >> session >> release
+runSession :: Session () -> IO (Either String ())
+runSession session = do
+    let session' = auth authKey >>= \s -> put (s,botQQ) >> verify >> session >> release
     let except = evalStateT session' ("",0) 
     runExceptT except
 

@@ -17,7 +17,6 @@ import Data.Text
 import Data.Aeson
 import Mirai.Types.Permission
 import Mirai.Types.MessageChain
-import Mirai.Types.Group
 
 data Sender = Sender {
     qq :: Int,

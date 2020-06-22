@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 71e814e3ec8d921f97ec1d59957f125b097e7a517a0565d19fc1b41231ef2dbe
+-- hash: 8137af0f4ce88c8172ecea31e0af9b7edf9eaccb9f8407f347dda82a590373c5
 
 name:           xqqbot
 version:        0.1.0.0
@@ -36,7 +36,6 @@ library
       Mirai.Events
       Mirai.Types.Events
       Mirai.Types.FriendMessage
-      Mirai.Types.Group
       Mirai.Types.GroupMessage
       Mirai.Types.MessageChain
       Mirai.Types.Permission
@@ -67,6 +66,9 @@ library
 executable xqqbot
   main-is: Main.hs
   other-modules:
+      Modules.Echo
+      Modules.LinkTitle
+      Modules.PixivID
       Paths_xqqbot
   hs-source-dirs:
       app

@@ -2,6 +2,11 @@
 {-#LANGUAGE ScopedTypeVariables #-}
 
 module Mirai.Types.GroupMessage(
+    Group(
+        Group,
+        groupID,
+        groupName,
+        groupPermission),
     Sender(
         Sender,
         memberQQ,
@@ -18,7 +23,16 @@ import Data.Text
 import Data.Aeson
 import Mirai.Types.Permission
 import Mirai.Types.MessageChain
-import Mirai.Types.Group
+
+data Group = Group {
+    groupID :: Int,
+    groupName :: Text,
+    groupPermission :: Permission
+}deriving (Eq,Show)
+
+instance FromJSON Group where
+    parseJSON = withObject "Group" $ \o -> 
+        Group `fmap` (o .: "id") <*> (o .: "name") <*> (o .: "permission")
 
 data Sender = Sender {
     memberQQ :: Int,
@@ -46,4 +60,5 @@ instance FromJSON GroupMessage where
         msgc <- o .: "messageChain"
         sndr <- o .: "sender"
         return $ GroupMessage msgc sndr
+
 

@@ -17,12 +17,27 @@ import Mirai.Api.SendImage
 import Mirai.Api.About
 import Control.Monad.IO.Class
 import Control.SignalSlot
+import Control.Monad.State.Lazy
+import Mirai.Types.Events
+import Mirai.Events
+import Mirai.Types.GroupMessage
+import Modules.LinkTitle
+import Modules.PixivID
 
 -- main :: IO ()
 -- main = scotty 23312 $ do
 --     post "/" $ do
 --         bodyData <- body
 --         liftAndCatchIO $ print bodyData
+
+events :: Events 
+events = emptyEvent {
+    onGroupMessage = Signal [echoLinkTitleGroup,echoImageFromPixivID],
+    onFriendMessage = Signal []
+}
+
+main :: IO ()
+main = runMirai events
 
 -- main :: IO ()
 -- main = do
@@ -44,16 +59,18 @@ import Control.SignalSlot
 
 -- main :: IO ()
 -- main = do
---     let js1 = toJSON [Plain "asd",At 123 "",Quote 0 0 0 0 [Plain "nmsl" ,Plain "cnm"]]
---     let js2 = toJSON $ object ["asd" .= ("nigger" :: Text) ,"fuck" .= object ["name" .= ("jb" :: Text) ,"age" .= (3 :: Int)]]
+--     -- let js1 = toJSON [Plain "asd",At 123 "",Quote 0 0 0 0 [Plain "nmsl" ,Plain "cnm"]]
+--     -- let js2 = toJSON $ object ["asd" .= ("nigger" :: Text) ,"fuck" .= object ["name" .= ("jb" :: Text) ,"age" .= (3 :: Int)]]
 --     --print $ encode js2
---     print $ fmap encode $ Success js2 /@ "fuck" /@ "age"
---     print $ (eitherDecode $ encode js1 :: Either String MessageChain)
---     let code = "123"
---     print $ (eitherDecode code :: Either String StatusCode)
+--     -- print $ fmap encode $ Success js2 /@ "fuck" /@ "age"
+--     -- print $ (eitherDecode $ encode js1 :: Either String MessageChain)
+--     -- let code = "123"
+--     -- print $ (eitherDecode code :: Either String StatusCode)
+--     let code = "{\"type\":\"GroupMessage\",\"messageChain\":[{\"type\":\"Plain\",\"text\":\"asdasd\"}],\"sender\":{\"id\":1209635268,\"memberName\":\"asdsad\",\"permission\":\"ADMINISTRATOR\",\"group\":{\"id\":123,\"name\":\"asdsad\",\"permission\":\"MEMBER\"}}}"
+--     print $ (eitherDecode code :: Either String EventType)
 
-main :: IO ()
-main = do
-    let sig1 = Signal [(\x -> print 3 >> print x),(\x -> print 5 >> print x)] :: Signal Int IO
-    let sig2 = sig1 `connect` (\x -> print 3 >> print x) `connect` (\x -> print 5 >> print x)
-    emit sig1 2
+-- main :: IO ()
+-- main = do
+--     let sig1 = Signal [(\x -> print 3 >> print x),(\x -> print 5 >> print x)] :: Signal Int IO
+--     let sig2 = sig1 `connect` (\x -> print 3 >> print x) `connect` (\x -> print 5 >> print x)
+--     emit sig1 2
