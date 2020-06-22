@@ -32,17 +32,15 @@ getHTML lnk = do
             return $ Just $ Text.HTML.DOM.parseLBS $ responseBody rspbdy
         _ -> return Nothing
 
-echoLinkTitleGroup :: GroupMessage -> IO ()
+echoLinkTitleGroup :: GroupMessage -> Session ()
 echoLinkTitleGroup groupmsg = do
-    s <- runSession $ do
-        let (Just rawmsg) = plain $ messageChain groupmsg
-        let groupid = GM.groupID $ GM.group $ GM.sender groupmsg
-        if groupid == 795831442 then do
-            maybeDoc <- liftIO $ getHTML rawmsg
-            case maybeDoc of 
-                (Just doc) -> do
-                    sendGroupMessage groupid [Plain $ getHTMLTitle doc]
-                    return ()
-                Nothing -> return ()
-        else return ()
-    return ()
+    let (Just rawmsg) = plain $ messageChain groupmsg
+    let groupid = GM.groupID $ GM.group $ GM.sender groupmsg
+    if groupid == 795831442 then do
+        maybeDoc <- liftIO $ getHTML rawmsg
+        case maybeDoc of 
+            (Just doc) -> do
+                sendGroupMessage groupid [Plain $ getHTMLTitle doc]
+                return ()
+            Nothing -> return ()
+    else return ()
