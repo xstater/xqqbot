@@ -35,7 +35,6 @@ runSession session = do
     let except = evalStateT session' ("",0) 
     runExceptT except
 
-
 data AuthResponse = AuthResponse StatusCode Text deriving (Eq,Show)
 
 instance FromJSON AuthResponse where
