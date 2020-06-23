@@ -4,6 +4,7 @@ module Modules.LinkTitle(
     echoLinkTitleGroup
 )where
 
+import Mirai.Config
 import Mirai.Api
 import Mirai.Api.SendMessage
 import Mirai.Types.MessageChain hiding (content)
@@ -25,10 +26,10 @@ getHTML :: Text -> IO (Maybe Document)
 getHTML lnk = do
     case mkURI lnk >>= useURI of
         (Just (Left (url,opts))) -> do
-            rspbdy <- runReq defaultHttpConfig $ req GET url NoReqBody lbsResponse mempty
+            rspbdy <- runReq httpConfig $ req GET url NoReqBody lbsResponse mempty
             return $ Just $ Text.HTML.DOM.parseLBS $ responseBody rspbdy
         (Just (Right (url,opts))) -> do
-            rspbdy <- runReq defaultHttpConfig $ req GET url NoReqBody lbsResponse mempty
+            rspbdy <- runReq httpConfig $ req GET url NoReqBody lbsResponse mempty
             return $ Just $ Text.HTML.DOM.parseLBS $ responseBody rspbdy
         _ -> return Nothing
 

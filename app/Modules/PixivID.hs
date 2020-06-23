@@ -4,6 +4,7 @@ module Modules.PixivID(
     echoImageFromPixivID
 )where
 
+import Mirai.Config
 import Mirai.Api
 import Mirai.Api.SendMessage
 import Mirai.Types.MessageChain hiding (content)
@@ -28,7 +29,7 @@ echoImageFromPixivID groupmsg = do
             (Just pvid) -> do
                 liftIO $ do
                     print pvid
-                    pic <- runReq defaultHttpConfig $ do
+                    pic <- runReq httpConfig $ do
                         bdy <- req GET (http "pixiv.cat" /: (Data.Text.concat [pvid,".jpg"])) NoReqBody lbsResponse mempty
                         return $ responseBody bdy
                     BS.writeFile imagePath pic

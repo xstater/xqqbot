@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9a34a12886e6d39accaebc31b3a6f9c1ba2f5dd42b78cfe6aeba20feaa4f4c1b
+-- hash: 90670e06cccb975f93a5877430e61e9c6ca878d8a80808172e714325322d433c
 
 name:           xqqbot
 version:        0.1.0.0
@@ -40,6 +40,14 @@ library
       Mirai.Types.MessageChain
       Mirai.Types.Permission
       Mirai.Types.StatusCode
+      Pixiv.Api
+      Pixiv.Config
+      Pixiv.Types.ImageURLs
+      Pixiv.Types.Metadata
+      Pixiv.Types.Rank
+      Pixiv.Types.Stats
+      Pixiv.Types.User
+      Pixiv.Types.Work
   other-modules:
       Paths_xqqbot
   hs-source-dirs:
@@ -50,6 +58,7 @@ library
     , bytestring
     , hint
     , html-conduit
+    , http-client
     , modern-uri
     , mtl
     , process
@@ -80,6 +89,7 @@ executable xqqbot
     , bytestring
     , hint
     , html-conduit
+    , http-client
     , modern-uri
     , mtl
     , process
@@ -108,6 +118,7 @@ test-suite xqqbot-test
     , bytestring
     , hint
     , html-conduit
+    , http-client
     , modern-uri
     , mtl
     , process
